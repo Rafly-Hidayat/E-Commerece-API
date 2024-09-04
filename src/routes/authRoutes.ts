@@ -1,5 +1,6 @@
 import { ServerRoute } from '@hapi/hapi';
 import * as AuthController from '../controllers/authController';
+import Joi from 'joi';
 
 export const authRoutes: ServerRoute[] = [
     {
@@ -7,7 +8,13 @@ export const authRoutes: ServerRoute[] = [
         path: '/auth/login',
         handler: AuthController.login,
         options: {
-            auth: false
+            auth: false,
+            validate: {
+                payload: Joi.object({
+                    username: Joi.string().max(50).required(),
+                    password: Joi.string().max(255).required(),
+                })
+            }
         }
     },
     {
@@ -15,7 +22,14 @@ export const authRoutes: ServerRoute[] = [
         path: '/auth/register',
         handler: AuthController.register,
         options: {
-            auth: false
+            auth: false,
+            validate: {
+                payload: Joi.object({
+                    username: Joi.string().max(50).required(),
+                    password: Joi.string().max(255).required(),
+                    email: Joi.string().max(255).email().required(),
+                })
+            }
         }
     }
 ];
