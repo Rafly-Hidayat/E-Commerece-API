@@ -5,7 +5,7 @@ import db from '../config/database';
 
 export const getAllProducts = async (request: Request, h: ResponseToolkit) => {
     const page = parseInt(request.query.page as string) || 1;
-    const pageSize = parseInt(request.query.pageSize as string) || 8;
+    const pageSize = parseInt(request.query.pageSize as string) || 10;
 
     try {
         const paginatedProducts = await ProductModel.getAllProducts(page, pageSize);
