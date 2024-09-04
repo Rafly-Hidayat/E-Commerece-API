@@ -1,8 +1,9 @@
 import Hapi from '@hapi/hapi';
 import JWT from '@hapi/jwt';
 import dotenv from 'dotenv';
-import { createDefaultUserIfNotExists } from './models/user';
+import { productRoutes } from './routes/productRoutes';
 import { authRoutes } from './routes/authRoutes';
+import { createDefaultUserIfNotExists } from './models/user';
 
 dotenv.config();
 
@@ -36,7 +37,7 @@ const init = async () => {
     server.auth.default('jwt');
 
     // Register routes
-    server.route(authRoutes);
+    server.route([...productRoutes, ...authRoutes]);
 
     // Create default user if not exists
     await createDefaultUserIfNotExists();
