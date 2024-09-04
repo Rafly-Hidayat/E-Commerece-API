@@ -6,19 +6,19 @@ This project is a simple E-Commerce Web API built with Node.js, Hapi.js, and Pos
 
 - Node.js (v14 or later)
 - PostgreSQL
-- npm
+- npm/pnpm/yarn (i use pnpm)
 
 ## Setup
 
 1. Clone the repository:
    ```
-   git clone <repository-url>
-   cd jubelio-ecommerce
+   git clone https://github.com/Rafly-Hidayat/E-Commerece-API.git
+   cd E-Commerece-API
    ```
 
 2. Install dependencies:
    ```
-   npm install
+   pnpm install
    ```
 
 3. Set up the database:
@@ -42,10 +42,11 @@ This project is a simple E-Commerce Web API built with Node.js, Hapi.js, and Pos
 
 1. Start the server:
    ```
-   npm start
+   pnpm start
    ```
    or in development:
-   npm run dev
+   ```
+   pnpm run dev
    ```
 
 2. The API will be available at `http://localhost:3000`
