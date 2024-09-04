@@ -3,6 +3,15 @@ import * as ProductModel from '../models/product';
 import axios from 'axios';
 import db from '../config/database';
 
+export interface Product {
+    id: number;
+    title: string;
+    sku: string;
+    image_url: string;
+    price: number;
+    description: string | null;
+}
+
 export const getAllProducts = async (request: Request, h: ResponseToolkit) => {
     const page = parseInt(request.query.page as string) || 1;
     const pageSize = parseInt(request.query.pageSize as string) || 10;
@@ -79,13 +88,15 @@ export const importProducts = async (request: Request, h: ResponseToolkit) => {
         const response = await axios.get('https://dummyjson.com/products?limit=194');
         const products = response.data.products;
 
-        for (const product of products) {
-            await db.none(
-                'INSERT INTO products (title, sku, image_url, price, description) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (sku) DO NOTHING',
-                [product.title, product.id.toString(), product.thumbnail, product.price, product.description]
-            );
-        }
+        const productValues = products.map((product: any) => [
+            product.title,
+            product.id.toString(),
+            product.thumbnail,
+            product.price,
+            product.description
+        ]);
 
+        await ProductModel.importProducts(productValues)
         return h.response({ message: 'Products imported successfully' }).code(200);
     } catch (error) {
         console.error('Error importing products:', error);

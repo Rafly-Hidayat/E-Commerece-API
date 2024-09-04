@@ -17,6 +17,8 @@ export interface PaginatedProducts {
     totalPages: number;
 }
 
+export interface Products extends Array<Product> { }
+
 export const getAllProducts = async (page: number, pageSize: number): Promise<PaginatedProducts> => {
     const offset = (page - 1) * pageSize;
 
@@ -58,3 +60,18 @@ export const updateProduct = async (id: number, product: Partial<Product>): Prom
 export const deleteProduct = async (id: number): Promise<Product | null> => {
     return db.oneOrNone('DELETE FROM products WHERE id = $1 RETURNING *', id);
 };
+
+export const importProducts = async (productValues: Products): Promise<void> => {
+    // Batch insert, skipping duplicates based on the SKU
+    const query = `
+    INSERT INTO products (title, sku, image_url, price, description)
+    VALUES ($1, $2, $3, $4, $5)
+    ON CONFLICT (sku) DO NOTHING;
+    `;
+
+    // Perform batch insert with pg-promise
+    await db.tx(t => {
+        const queries = productValues.map((product: Product) => t.none(query, product));
+        return t.batch(queries);
+    });
+}
