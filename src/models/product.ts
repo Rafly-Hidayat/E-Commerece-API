@@ -75,3 +75,7 @@ export const importProducts = async (productValues: Products): Promise<void> => 
         return t.batch(queries);
     });
 }
+
+export const getProductBySku = async (sku: string): Promise<Product | null> => {
+    return db.oneOrNone('SELECT * FROM products WHERE sku = $1', sku);
+};

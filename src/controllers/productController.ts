@@ -1,7 +1,18 @@
 import { Request, ResponseToolkit } from '@hapi/hapi';
 import * as ProductModel from '../models/product';
 import axios from 'axios';
-import db from '../config/database';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as util from 'util';
+
+const writeFile = util.promisify(fs.writeFile);
+
+const saveImage = async (image: any): Promise<string> => {
+    const name = `${Date.now()}-${image.hapi.filename}`;
+    const filePath = path.join(__dirname, '../../uploads', name);
+    await writeFile(filePath, image._data);
+    return `uploads/${name}`;
+};
 
 export interface Product {
     id: number;
@@ -41,10 +52,31 @@ export const getProductById = async (request: Request, h: ResponseToolkit) => {
 };
 
 export const createProduct = async (request: Request, h: ResponseToolkit) => {
-    const { title, sku, image_url, price, description } = request.payload as any;
-
     try {
-        const newProduct = await ProductModel.createProduct({ title, sku, image_url, price, description });
+        const payload: any = request.payload;
+        const image: any = payload.image;
+
+        // Validate image
+        if (!image || !image.hapi.headers['content-type'].startsWith('image/')) {
+            return h.response({ error: 'Invalid image file' }).code(400);
+        }
+
+        // Validate SKU
+        const existingProduct = await ProductModel.getProductBySku(payload.sku);
+        if (existingProduct) {
+            return h.response({ error: 'A product with this SKU already exists' }).code(409);
+        }
+
+        const imageUrl = await saveImage(image);
+
+        const newProduct = await ProductModel.createProduct({
+            title: payload.title,
+            sku: payload.sku,
+            image_url: `${request.server.info.uri}/${imageUrl}`,
+            price: parseFloat(payload.price),
+            description: payload.description
+        });
+
         return h.response(newProduct).code(201);
     } catch (error) {
         console.error('Error creating product:', error);
@@ -54,10 +86,37 @@ export const createProduct = async (request: Request, h: ResponseToolkit) => {
 
 export const updateProduct = async (request: Request, h: ResponseToolkit) => {
     const { id } = request.params;
-    const { title, sku, image_url, price, description } = request.payload as any;
+    const payload: any = request.payload;
 
     try {
-        const updatedProduct = await ProductModel.updateProduct(parseInt(id), { title, sku, image_url, price, description });
+        let updateData: Partial<ProductModel.Product> = {
+            title: payload.title,
+            price: payload.price ? parseFloat(payload.price) : undefined,
+            description: payload.description
+        };
+
+        if (payload.sku) {
+            // Validate SKU
+            const existingProduct = await ProductModel.getProductBySku(payload.sku);
+            if (existingProduct && existingProduct.id !== id) {
+                return h.response({ error: 'A product with this SKU already exists' }).code(409);
+            }
+            updateData.sku = payload.sku;
+        }
+
+        if (payload.image) {
+            const image: any = payload.image;
+
+            // Validate image
+            if (!image || !image.hapi.headers['content-type'].startsWith('image/')) {
+                return h.response({ error: 'Invalid image file' }).code(400);
+            }
+
+            const imageUrl = await saveImage(image);
+            updateData.image_url = `${request.server.info.uri}/${imageUrl}`;
+        }
+
+        const updatedProduct = await ProductModel.updateProduct(parseInt(id), updateData);
         if (!updatedProduct) {
             return h.response({ error: 'Product not found' }).code(404);
         }

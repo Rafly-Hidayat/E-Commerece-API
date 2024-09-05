@@ -13,7 +13,10 @@ export const authRoutes: ServerRoute[] = [
                 payload: Joi.object({
                     username: Joi.string().max(50).required(),
                     password: Joi.string().max(255).required(),
-                })
+                }),
+                failAction: (request, h, err) => {
+                    throw err;
+                }
             }
         }
     },
@@ -28,7 +31,10 @@ export const authRoutes: ServerRoute[] = [
                     username: Joi.string().max(50).required(),
                     password: Joi.string().max(255).required(),
                     email: Joi.string().max(255).email().required(),
-                })
+                }),
+                failAction: (request, h, err) => {
+                    throw err;
+                }
             }
         }
     }

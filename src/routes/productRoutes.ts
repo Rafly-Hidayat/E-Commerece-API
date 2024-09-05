@@ -13,7 +13,10 @@ export const productRoutes: ServerRoute[] = [
                 query: Joi.object({
                     page: Joi.number().integer().min(1).default(1),
                     pageSize: Joi.number().integer().min(1).max(100).default(10)
-                })
+                }),
+                failAction: (request, h, err) => {
+                    throw err;
+                }
             }
         }
     },
@@ -31,14 +34,24 @@ export const productRoutes: ServerRoute[] = [
         handler: ProductController.createProduct,
         options: {
             auth: 'jwt',
+            payload: {
+                output: 'stream',
+                parse: true,
+                allow: 'multipart/form-data',
+                multipart: true,
+                maxBytes: 5 * 1024 * 1024 // 5MB Max
+            },
             validate: {
                 payload: Joi.object({
-                    title: Joi.string().max(255).required(),
-                    sku: Joi.string().max(50).required(),
-                    image_url: Joi.string().optional(),
-                    price: Joi.number().precision(2).positive().max(99999999.99).required(),
-                    description: Joi.string().optional(),
-                })
+                    title: Joi.string().required(),
+                    sku: Joi.string().required(),
+                    price: Joi.number().required(),
+                    description: Joi.string().allow(null, '').optional(),
+                    image: Joi.any().required(),
+                }),
+                failAction: (request, h, err) => {
+                    throw err;
+                }
             }
         }
     },
@@ -48,14 +61,24 @@ export const productRoutes: ServerRoute[] = [
         handler: ProductController.updateProduct,
         options: {
             auth: 'jwt',
+            payload: {
+                output: 'stream',
+                parse: true,
+                allow: 'multipart/form-data',
+                multipart: true,
+                maxBytes: 2 * 1024 * 1024 // 2MB Max
+            },
             validate: {
                 payload: Joi.object({
-                    title: Joi.string().max(255).optional(),
-                    sku: Joi.string().max(50).optional(),
-                    image_url: Joi.string().optional(),
-                    price: Joi.number().precision(2).positive().max(99999999.99).required(),
-                    description: Joi.string().optional(),
-                })
+                    title: Joi.string(),
+                    sku: Joi.string(),
+                    price: Joi.number(),
+                    description: Joi.string().allow(null, ''),
+                    image: Joi.any(),
+                }),
+                failAction: (request, h, err) => {
+                    throw err;
+                }
             }
         }
     },
