@@ -66,7 +66,7 @@ export const productRoutes: ServerRoute[] = [
                 parse: true,
                 allow: 'multipart/form-data',
                 multipart: true,
-                maxBytes: 2 * 1024 * 1024 // 2MB Max
+                maxBytes: 5 * 1024 * 1024 // 5MB Max
             },
             validate: {
                 payload: Joi.object({
