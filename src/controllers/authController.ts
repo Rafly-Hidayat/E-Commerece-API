@@ -11,12 +11,12 @@ export const login = async (request: Request, h: ResponseToolkit) => {
     try {
         const user = await UserModel.getUserByUsername(username);
         if (!user) {
-            return h.response({ error: 'Invalid credentials' }).code(401);
+            return h.response({ error: 'Unauthorized', message:'Invalid credentials' }).code(401);
         }
 
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
-            return h.response({ error: 'Invalid credentials' }).code(401);
+            return h.response({ error: 'Unauthorized', message:'Invalid credentials' }).code(401);
         }
 
         const token = generateToken(user);
@@ -33,7 +33,7 @@ export const register = async (request: Request, h: ResponseToolkit) => {
     try {
         const existingUser = await UserModel.getUserByUsername(username);
         if (existingUser) {
-            return h.response({ error: 'Username already exists' }).code(400);
+            return h.response({ error:'Conflict' , message: 'Username already exists' }).code(409);
         }
 
         const newUser = await UserModel.createUser(username, email, password);

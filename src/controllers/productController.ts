@@ -42,7 +42,7 @@ export const getProductById = async (request: Request, h: ResponseToolkit) => {
     try {
         const product = await ProductModel.getProductById(parseInt(id));
         if (!product) {
-            return h.response({ error: 'Product not found' }).code(404);
+            return h.response({ error: 'Not Found', message: 'Product not found' }).code(404);
         }
         return h.response(product).code(200);
     } catch (error) {
@@ -58,13 +58,13 @@ export const createProduct = async (request: Request, h: ResponseToolkit) => {
 
         // Validate image
         if (!image || !image.hapi.headers['content-type'].startsWith('image/')) {
-            return h.response({ error: 'Invalid image file' }).code(400);
+            return h.response({ error: 'Bad Request', message: 'Invalid image file' }).code(400);
         }
 
         // Validate SKU
         const existingProduct = await ProductModel.getProductBySku(payload.sku);
         if (existingProduct) {
-            return h.response({ error: 'A product with this SKU already exists' }).code(409);
+            return h.response({ error: 'Conflict', message: 'A product with this SKU already exists' }).code(409);
         }
 
         const imageUrl = await saveImage(image);
@@ -98,8 +98,8 @@ export const updateProduct = async (request: Request, h: ResponseToolkit) => {
         if (payload.sku) {
             // Validate SKU
             const existingProduct = await ProductModel.getProductBySku(payload.sku);
-            if (existingProduct && existingProduct.id !== id) {
-                return h.response({ error: 'A product with this SKU already exists' }).code(409);
+            if (existingProduct && existingProduct.id !== +id) {
+                return h.response({ error: 'Conflict', message: 'A product with this SKU already exists' }).code(409);
             }
             updateData.sku = payload.sku;
         }
@@ -109,7 +109,7 @@ export const updateProduct = async (request: Request, h: ResponseToolkit) => {
 
             // Validate image
             if (!image || !image.hapi.headers['content-type'].startsWith('image/')) {
-                return h.response({ error: 'Invalid image file' }).code(400);
+                return h.response({ error: 'Bad Request', message: 'Invalid image file' }).code(400);
             }
 
             const imageUrl = await saveImage(image);
@@ -118,7 +118,7 @@ export const updateProduct = async (request: Request, h: ResponseToolkit) => {
 
         const updatedProduct = await ProductModel.updateProduct(parseInt(id), updateData);
         if (!updatedProduct) {
-            return h.response({ error: 'Product not found' }).code(404);
+            return h.response({ error: 'Not Found', message: 'Product not found' }).code(404);
         }
         return h.response(updatedProduct).code(200);
     } catch (error) {
@@ -133,7 +133,7 @@ export const deleteProduct = async (request: Request, h: ResponseToolkit) => {
     try {
         const deletedProduct = await ProductModel.deleteProduct(parseInt(id));
         if (!deletedProduct) {
-            return h.response({ error: 'Product not found' }).code(404);
+            return h.response({ error: 'Not Found', message: 'Product not found' }).code(404);
         }
         return h.response({ message: 'Product deleted successfully' }).code(200);
     } catch (error) {

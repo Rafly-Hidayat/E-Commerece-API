@@ -27,7 +27,7 @@ export const getAllProducts = async (page: number, pageSize: number): Promise<Pa
     const total = parseInt(totalResult.count);
 
     // Get products for the current page
-    const products = await db.any('SELECT * FROM products ORDER BY id LIMIT $1 OFFSET $2', [pageSize, offset]);
+    const products = await db.any('SELECT * FROM products ORDER BY id DESC LIMIT $1 OFFSET $2', [pageSize, offset]);
 
     return {
         products,
