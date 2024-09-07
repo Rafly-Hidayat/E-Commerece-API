@@ -15,14 +15,3 @@ export const generateToken = (user: User): string => {
         algorithm: 'HS256'
     });
 };
-
-// export const validateToken = (token: string): any => {
-//     try {
-//         return JWT.token.verify(token, {
-//             key: JWT_SECRET,
-//             algorithms: ['HS256']
-//         });
-//     } catch (error) {
-//         return null;
-//     }
-// };

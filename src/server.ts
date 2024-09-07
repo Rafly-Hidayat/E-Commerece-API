@@ -58,7 +58,7 @@ const init = async () => {
             }
         },
         options: {
-            auth: false // Disable authentication for this route
+            auth: false
         }
     });
 
