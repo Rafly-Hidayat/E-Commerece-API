@@ -38,6 +38,8 @@ This project is a simple E-Commerce Web API built with Node.js, Hapi.js, and Pos
      JWT_SECRET=your_jwt_secret
      ```
 
+5. Create `uploads` folder in the root directory
+
 ## Running the API
 
 1. Start the server:
